@@ -51,7 +51,7 @@ public:
      * @param file_name The path to the CSV file containing Zip Code data.
      * @return True if the file is successfully read and parsed, false otherwise.
      */
-    bool read_csv(const std::string& file_name);
+    bool read_csv();
 
     /**
      * @brief Retrieves the records grouped by state.
