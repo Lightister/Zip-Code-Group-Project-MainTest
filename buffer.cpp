@@ -1,5 +1,5 @@
 // Buffer.cpp
-#include "Buffer.h"
+#include "buffer.h"
 #include <sstream>
 #include <iostream>
 
