@@ -5,23 +5,30 @@
 #include <string>
 #include <map>
 #include <vector>
-using namespace std;
+//using namespace std;
 
 
-map<string, vector<ZipCodeRecord>> CSVProcessing::sortBuffer() { // sort by state with the hashmap but how once it is sorted we can do the direction farthest zip
+void CSVProcessing::printZipCodeRecord( const ZipCodeRecord& record ) {
+    std::cout << "Zip Code: " << record.zip_code
+        << ", State ID: " << record.state_id
+        << ", Latitude: " << record.latitude
+        << ", Longitude: " << record.longitude << std::endl;
+}
+std::map<string, std::vector<ZipCodeRecord>> CSVProcessing::sortBuffer() { 
     float eastMost, westMost, northMost, southMost;
     Buffer CSVBuffer;
-    map<string, vector<ZipCodeRecord>> state_zip_map = CSVBuffer.get_state_zip_codes();
-    map<string, vector<ZipCodeRecord>> sorted_directions;
+    CSVBuffer.read_csv( );
+    std::map<string, std::vector<ZipCodeRecord>> state_zip_map = CSVBuffer.get_state_zip_codes();
+    std::map<string, std::vector<ZipCodeRecord>> sorted_directions;
     for ( auto& state : state_zip_map ) {
-        const string& stateID = state.first;
-        const vector<ZipCodeRecord>& stateInfo = state.second;
-
+        const std::string& stateID = state.first;
+        const std::vector<ZipCodeRecord>& stateInfo = state.second;
+        // intial loading of directions
         ZipCodeRecord easternmost = stateInfo[ 0 ];
         ZipCodeRecord westernmost = stateInfo[ 0 ];
         ZipCodeRecord northernmost = stateInfo[ 0 ];
         ZipCodeRecord southernmost = stateInfo[ 0 ];
-
+        // checks if the current records zip is one of the maxed directions
         for ( const auto& record : stateInfo ) {
             if ( record.longitude < easternmost.longitude ) {
                 easternmost = record;
@@ -35,16 +42,33 @@ map<string, vector<ZipCodeRecord>> CSVProcessing::sortBuffer() { // sort by stat
             if ( record.latitude < southernmost.latitude ) {
                 southernmost = record;
             }
-            sorted_directions[ stateID ] = { easternmost, westernmost, northernmost, southernmost };
         }
+        sorted_directions[ stateID ] = { easternmost, westernmost, northernmost, southernmost };
+        // std::cout << "State: " << stateID << std::endl;
+        // std::cout << "  Easternmost: ";
+        // printZipCodeRecord( easternmost );
+        // std::cout << "  Westernmost: ";
+        // printZipCodeRecord( westernmost );
+        // std::cout << "  Northernmost: ";
+        // printZipCodeRecord( northernmost );
+        // std::cout << "  Southernmost: ";
+        // printZipCodeRecord( southernmost );
+        // std::cout << std::endl;  // Add an extra line for readability
     }
+    // sorted_directions looks like this
+    // [stateID] : {
+    //     { east most zip, stateID, directions },
+    //     { west most zip, stateID, directions },
+    //     { northern most zip, stateID, directions },
+    //     { southern most zip, stateID, directions }
+    // }
+    
     return sorted_directions;
-}
-    // we could also set up a const variable that will have the state ids based on their index/hasmap key and with that we can instantlly find where the zip should go
-void CSVProcessing::addHeader( string& file_name ) { // state id, Easternmost (least longitude), Westernmost, Northernmost (greatest latitude), and Southernmost Zip Code
+}   
+void CSVProcessing::addHeader( std::string& file_name ) { // state id, Easternmost (least longitude), Westernmost, Northernmost (greatest latitude), and Southernmost Zip Code
     
 }
 
-bool CSVProcessing::csvOutput( string& file_name ) { // fill from the sortered buffer? either output as we go from the buffer or create an array or vector to put all the sorting and then output to the csv
-    
+bool CSVProcessing::csvOutput( std::string& file_name ) { // fill from the sortered buffer? either output as we go from the buffer or create an array or vector to put all the sorting and then output to the csv
+    return true;
 }

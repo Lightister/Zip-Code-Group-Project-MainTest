@@ -26,7 +26,7 @@
  * @return True if the file is read successfully, false otherwise.
  */
 bool Buffer::read_csv() {
-    std::ifstream file("us_postal_codes.csv"); // Open the file
+    std::ifstream file( "us_postal_codes.csv" ); // Open the file
     if (!file.is_open()) {
         std::cerr << "Error opening file: us_postal_codes.csv" << std::endl;
         return false;
@@ -41,6 +41,7 @@ bool Buffer::read_csv() {
     }
 
     file.close(); // Close the file
+    std::cout << "CSV is now in the buffer" << std::endl;
     return true; // Return true if reading was successful
 }
 
@@ -79,14 +80,42 @@ std::map<std::string, std::vector<ZipCodeRecord>> Buffer::get_state_zip_codes() 
 ZipCodeRecord Buffer::parse_csv_line(const std::string& line) const {
     std::stringstream ss(line); // Use stringstream to parse the line
     ZipCodeRecord record; // Create a ZipCodeRecord to hold the data
-
+    std::string skip;
     // Extract and store each field
-    std::getline(ss, record.zip_code, ','); // Get Zip Code
-    std::getline(ss, record.state_id, ','); // Get State ID
+    std::getline( ss, record.zip_code, ',' ); // Get Zip Code
+    std::getline( ss, skip, ',' ); // Get Zip Code
+    std::getline( ss, record.state_id, ',' ); // Get State ID
+    std::getline( ss, skip, ',' ); // Get Zip Code
     std::string latitude_str, longitude_str;
     std::getline(ss, latitude_str, ','); // Get Latitude as string
     std::getline(ss, longitude_str, ','); // Get Longitude as string
-    record.latitude = std::stod(latitude_str); // Convert to double
-    record.longitude = std::stod(longitude_str); // Convert to double
+    try {
+        if ( !latitude_str.empty() ) {
+            record.latitude = std::stod( latitude_str ); // Convert to double
+        }
+        else {
+            std::cerr << "Invalid latitude value for Zip Code: " << record.zip_code << std::endl;
+            record.latitude = 0.0; // Default value or handle appropriately
+        }
+
+        if ( !longitude_str.empty() ) {
+            record.longitude = std::stod( longitude_str ); // Convert to double
+        }
+        else {
+            std::cerr << "Invalid longitude value for Zip Code: " << record.zip_code << std::endl;
+            record.longitude = 0.0; // Default value or handle appropriately
+        }
+    }
+    catch ( const std::invalid_argument& e ) {
+        std::cerr << "Error: Invalid numeric value in CSV for Zip Code: " << record.zip_code << record.state_id << std::endl;
+        record.latitude = 0.0;  // Default value or handle appropriately
+        record.longitude = 0.0; // Default value or handle appropriately
+    }
+    catch ( const std::out_of_range& e ) {
+        std::cerr << "Error: Out of range numeric value in CSV for Zip Code: " << record.zip_code << std::endl;
+        record.latitude = 0.0;  // Default value or handle appropriately
+        record.longitude = 0.0; // Default value or handle appropriately
+    }
+
     return record; // Return the populated record
 }
