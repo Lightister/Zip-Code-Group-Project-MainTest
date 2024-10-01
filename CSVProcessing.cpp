@@ -65,10 +65,58 @@ std::map<string, std::vector<ZipCodeRecord>> CSVProcessing::sortBuffer() {
     
     return sorted_directions;
 }   
-void CSVProcessing::addHeader( std::string& file_name ) { // state id, Easternmost (least longitude), Westernmost, Northernmost (greatest latitude), and Southernmost Zip Code
-    
+
+/**
+ * @brief Creates and adds a header to the CSV file.
+ * 
+ * This function adds a header row to the specified CSV file. The header includes
+ * columns for State, Easternmost, Westernmost, Northernmost, and Southernmost zip codes.
+ * 
+ * @param file_name The name of the CSV file to which the header will be added.
+ */
+void CSVProcessing::addHeader(std::string& file_name) {
+    std::ofstream file(file_name);
+    if (file.is_open()) {
+        file << "State,Easternmost,Westernmost,Northernmost,Southernmost\n";
+        file.close();
+        std::cout << "Header added successfully to " << file_name << std::endl;
+    } else {
+        std::cerr << "Unable to open file: " << file_name << std::endl;
+    }
 }
 
-bool CSVProcessing::csvOutput( std::string& file_name ) { // fill from the sortered buffer? either output as we go from the buffer or create an array or vector to put all the sorting and then output to the csv
+
+
+/**
+ * @brief Outputs the processed zip code data to a CSV file.
+ * 
+ * This function takes the sorted buffer of zip code records and writes them to a CSV file.
+ * Each row contains the state ID and the zip codes for the easternmost, westernmost,
+ * northernmost, and southernmost points in that state.
+ * 
+ * @param file_name The name of the CSV file to which the data will be written.
+ * @return true if the data was successfully written to the file, false otherwise.
+ */
+bool CSVProcessing::csvOutput(std::string& file_name) {
+    std::map<std::string, std::vector<ZipCodeRecord>> sorted_data = sortBuffer();
+    std::ofstream file(file_name, std::ios::app);  // Open in append mode
+    
+    if (!file.is_open()) {
+        std::cerr << "Unable to open file: " << file_name << std::endl;
+        return false;
+    }
+    
+    for (const auto& [state, records] : sorted_data) {
+        if (records.size() == 4) {  // Ensure we have all 4 directional records
+            file << state << ","
+                 << records[0].zip_code << ","  // Easternmost
+                 << records[1].zip_code << ","  // Westernmost
+                 << records[2].zip_code << ","  // Northernmost
+                 << records[3].zip_code << "\n";  // Southernmost
+        }
+    }
+    
+    file.close();
+    std::cout << "Data successfully written to " << file_name << std::endl;
     return true;
 }
