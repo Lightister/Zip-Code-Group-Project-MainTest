@@ -8,13 +8,28 @@
 //using namespace std;
 
 
-void CSVProcessing::printZipCodeRecord( const ZipCodeRecord& record ) {
-    std::cout << "Zip Code: " << record.zip_code
-        << ", State ID: " << record.state_id
-        << ", Latitude: " << record.latitude
-        << ", Longitude: " << record.longitude << std::endl;
-}
-std::map<string, std::vector<ZipCodeRecord>> CSVProcessing::sortBuffer() { 
+// void CSVProcessing::printZipCodeRecord( const ZipCodeRecord& record ) {
+//     std::cout << "Zip Code: " << record.zip_code
+//         << ", State ID: " << record.state_id
+//         << ", Latitude: " << record.latitude
+//         << ", Longitude: " << record.longitude << std::endl;
+// }
+/**
+ * @brief Sorts the CSV buffer and finds the zip codes (eastmost, westmost, northmost, southmost) for each state.
+ *
+ * This method reads the CSV data, processes it to identify the easternmost, westernmost, northernmost,
+ * and southernmost zip codes for each state, and then stores these in a map (automatically sorts alphebetically).
+ *
+ * @return A map where the key is the state ID and the value is a vector containing the four ZipCodeRecord. The output looks as follows:
+ * [stateID] : {
+        { east most zip, stateID, Cords },
+        { west most zip, stateID, Cords },
+        { northern most zip, stateID, Cords },
+        { southern most zip, stateID, Cords }
+    }
+ * 
+ */
+std::map<string, std::vector<ZipCodeRecord>> CSVProcessing::sortBuffer() {
     float eastMost, westMost, northMost, southMost;
     Buffer CSVBuffer;
     CSVBuffer.read_csv( );
@@ -84,9 +99,6 @@ void CSVProcessing::addHeader(std::string& file_name) {
         std::cerr << "Unable to open file: " << file_name << std::endl;
     }
 }
-
-
-
 /**
  * @brief Outputs the processed zip code data to a CSV file.
  * 
@@ -105,7 +117,6 @@ bool CSVProcessing::csvOutput(std::string& file_name) {
         std::cerr << "Unable to open file: " << file_name << std::endl;
         return false;
     }
-    
     for (const auto& [state, records] : sorted_data) {
         if (records.size() == 4) {  // Ensure we have all 4 directional records
             file << state << ","
@@ -115,7 +126,6 @@ bool CSVProcessing::csvOutput(std::string& file_name) {
                  << records[3].zip_code << "\n";  // Southernmost
         }
     }
-    
     file.close();
     std::cout << "Data successfully written to " << file_name << std::endl;
     return true;
